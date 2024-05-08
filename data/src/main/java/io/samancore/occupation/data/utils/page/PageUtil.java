@@ -1,13 +1,12 @@
 package io.samancore.occupation.data.utils.page;
 
+import io.samancore.occupation.model.PageData;
 import jakarta.ws.rs.core.MultivaluedMap;
-
-import static io.samancore.occupation.data.utils.page.PageParamConstant.*;
 
 import java.util.List;
 import java.util.function.Function;
 
-import io.samancore.occupation.model.PageData;
+import static io.samancore.occupation.data.utils.page.PageParamConstant.*;
 
 public class PageUtil {
 

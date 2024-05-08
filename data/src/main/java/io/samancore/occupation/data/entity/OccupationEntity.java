@@ -1,9 +1,9 @@
 package io.samancore.occupation.data.entity;
 
-import lombok.Getter;
-import lombok.Setter;
 import io.samancore.occupation.data.entity.common.AuditCommon;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Getter

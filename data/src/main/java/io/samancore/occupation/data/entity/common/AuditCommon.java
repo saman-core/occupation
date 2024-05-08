@@ -1,15 +1,14 @@
 package io.samancore.occupation.data.entity.common;
 
+import io.samancore.occupation.model.type.GeneralStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-
-import io.samancore.occupation.model.type.GeneralStatus;
-
-import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.Date;
 
 @Getter
 @Setter
