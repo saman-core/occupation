@@ -1,6 +1,6 @@
 *
 !.env
-!target/*-runner
-!target/*-runner.jar
-!target/lib/*
-!target/quarkus-app/*
+!application/target/*-runner
+!application/target/*-runner.jar
+!application/target/lib/*
+!application/target/quarkus-app/*
