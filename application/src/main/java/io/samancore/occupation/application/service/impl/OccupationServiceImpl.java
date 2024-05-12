@@ -11,6 +11,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
+import java.util.List;
+
 @ApplicationScoped
 public class OccupationServiceImpl implements OccupationService {
 
@@ -24,9 +26,16 @@ public class OccupationServiceImpl implements OccupationService {
     OccupationTransformer transformer;
 
     @Override
-    public PageData<Occupation> getPageByLabel(String label, PageRequest pageRequest) {
+    public PageData<Occupation> getPageByParams(List<Long> ids, String label, PageRequest pageRequest) {
         log.debugf("OccupationServiceImpl.getPageByLabel %s", label);
-        var occupations = repository.getPageByLabel(label, pageRequest);
+        var occupations = repository.getPageByParams(ids, label, pageRequest);
         return PageUtil.toPageModel(occupations, transformer::toModel);
+    }
+
+    @Override
+    public Occupation getById(Long id) {
+        log.debugf("OccupationServiceImpl.getById %s", id);
+        var occupation = repository.getById(id);
+        return transformer.toModel(occupation);
     }
 }

@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import org.jboss.logging.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
@@ -23,7 +24,7 @@ public class OccupationRepositoryPanache implements PanacheRepository<Occupation
     Logger log;
 
     @Override
-    public PageData<OccupationEntity> getPageByLabel(String label, PageRequest pageRequest) {
+    public PageData<OccupationEntity> getPageByParams(List<Long> ids, String label, PageRequest pageRequest) {
         log.debugf("OccupationRepositoryPanache.getPageByLabel %s", label);
 
         String search = "%" + label + "%";
@@ -32,7 +33,9 @@ public class OccupationRepositoryPanache implements PanacheRepository<Occupation
         params.put("status", GeneralStatus.ACTIVE);
 
         PanacheQuery<OccupationEntity> query;
-        if (label != null) {
+        if (ids != null && !ids.isEmpty()) {
+            query = this.find("id in (?1)", ids);
+        } else if (label != null) {
             var result = RepositoryConstants.LIKE_LABEL + RepositoryConstants.AND + RepositoryConstants.FILTER_GENERAL_STATUS;
             query = this.find(result, PagePanacheUtil.generateSort(pageRequest), params);
         } else {
@@ -42,5 +45,11 @@ public class OccupationRepositoryPanache implements PanacheRepository<Occupation
         var list = query.page(PagePanacheUtil.generatePage(pageRequest)).list();
         var total = query.count();
         return PageData.<OccupationEntity>newBuilder().setData(list).setCount(total).build();
+    }
+
+    @Override
+    public OccupationEntity getById(Long id) {
+        log.debugf("OccupationRepositoryPanache.getById %s", id);
+        return this.findById(id);
     }
 }
