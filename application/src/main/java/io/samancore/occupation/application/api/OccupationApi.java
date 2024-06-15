@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.UriInfo;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.reactive.RestQuery;
+import org.jboss.resteasy.reactive.Separator;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class OccupationApi {
     @GET
     @Path("/")
     @RolesAllowed({"admin"})
-    public PageData<Occupation> getAll(@RestQuery("label__regex") String searchValue, @RestQuery("ids") List<Long> ids) {
+    public PageData<Occupation> getAll(@RestQuery("label__regex") String searchValue, @RestQuery("ids") @Separator(",") List<Long> ids) {
         log.debug("OccupationApi.getAll");
         PageRequest pageRequest;
         if (ids != null && !ids.isEmpty()) {
