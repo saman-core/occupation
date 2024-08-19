@@ -1,5 +1,4 @@
 *
-!.env
 !application/target/*-runner
 !application/target/*-runner.jar
 !application/target/lib/*
