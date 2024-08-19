@@ -18,11 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set env DEPLOY_HASH
-        run: |
-          echo "DEPLOY_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
-          echo "DEPLOY_HASH: $DEPLOY_HASH"
-
       - name: Setup graalvm
         uses: graalvm/setup-graalvm@v1
         with:
@@ -31,12 +26,6 @@ jobs:
           github-token: ${{ secrets.GIT_TOKEN }}
           native-image-job-reports: 'true'
           version: '22.3.3.1-Final'
-
-      - name: Set env
-        env:
-          BASE64: ${{ secrets.ENV_FILE_LOCAL }}
-        run: |
-          base64 -d -i <<<$(echo $BASE64) > .env
 
       - name: Set settings.xml
         env:
@@ -70,10 +59,20 @@ jobs:
           context: ./
           file: ./application/src/main/docker/Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.ACTOR }}/${{ env.IMAGE_APP_NAME }}:${{ env.DEPLOY_HASH }}
+          tags: ${{ env.REGISTRY }}/${{ env.ACTOR }}/${{ env.IMAGE_APP_NAME }}:${{ github.sha }}
 
       - name: Set Kubectl
         uses: azure/setup-kubectl@v4
+
+      - name: Set config file
+        env:
+          BASE64: ${{ secrets.ENV_FILE_LOCAL }}
+        run: |
+          base64 -d -i <<<$(echo $BASE64) >> .env
+          sed -i 's/=/: /' .env
+          sed -i 's/^/  /' .env
+          sed -i 's/APP_NAME/${{ env.APP_NAME }}/g' ./kubernetes/deploy-secret.yml
+          cat .env >> ./kubernetes/deploy-secret.yml
 
       - name: Set Kubeconfig file and deploy app to K8S
         env:
@@ -81,7 +80,7 @@ jobs:
         run: |
           base64 -d -i <<<$(echo $BASE64) > ./kubeconfig
           export KUBECONFIG=./kubeconfig
-          echo "$DEPLOY_HASH"
-          sed -i -e 's/CONTAINER_IMAGE/${{ env.REGISTRY }}\/${{ env.ACTOR }}\/${{ env.IMAGE_APP_NAME }}:${{ env.DEPLOY_HASH }}/g' -e 's/APP_VERSION/${{ github.run_number }}/g' -e 's/APP_NAME/${{ env.APP_NAME }}/g' -e 's/DEPLOY_HASH/${{ env.DEPLOY_HASH }}/g' -e 's/N_REPLICA/${{ env.N_REPLICA }}/g' ./application/deployment-local.yml
-          kubectl delete -f ./application/deployment-local.yml -n api --insecure-skip-tls-verify || true
-          kubectl apply -f ./application/deployment-local.yml -n api --insecure-skip-tls-verify
+          sed -i -e 's/CONTAINER_IMAGE/${{ env.REGISTRY }}\/${{ env.ACTOR }}\/${{ env.IMAGE_APP_NAME }}:${{ github.sha }}/g' -e 's/APP_VERSION/${{ github.run_number }}/g' -e 's/APP_NAME/${{ env.APP_NAME }}/g' -e 's/DEPLOY_HASH/${{ github.sha }}/g' -e 's/N_REPLICA/${{ env.N_REPLICA }}/g' ./kubernetes/deployment-local.yml
+          kubectl apply -f ./kubernetes/deploy-secret.yml -n api --insecure-skip-tls-verify
+          kubectl delete -f ./kubernetes/deployment-local.yml -n api --insecure-skip-tls-verify || true
+          kubectl apply -f ./kubernetes/deployment-local.yml -n api --insecure-skip-tls-verify
